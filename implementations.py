@@ -119,8 +119,9 @@ def least_squares(y: np.ndarray, tx: np.ndarray) -> Tuple[float, np.ndarray]:
     >>> least_squares(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]))
     (array([ 0.21212121, -0.12121212]), 8.666684749742561e-33)
     """
-
-    w = np.linalg.solve(tx.T.dot(tx), tx.T.dot(y))
+    x = tx.T.dot(tx)
+    y_ = tx.T.dot(y)
+    w = np.linalg.solve(x, y)
     loss = compute_loss(y, tx, w)
 
     return loss, w
@@ -208,7 +209,7 @@ def mean_squared_error_sgd(y : np.ndarray, tx : np.ndarray, initial_w : np.ndarr
             # update w through the stochastic gradient update
             w = w - gamma * grad
             # calculate loss
-            loss = calculate_mse(y, tx, w)
+            loss = compute_loss(y, tx, w)
             # store w and loss
             ws.append(w)
             loss_sgd.append(loss)
