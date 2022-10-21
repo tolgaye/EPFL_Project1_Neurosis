@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Problem Sheet 2.
+"""
 Gradient Descent
 """
 from cost import calculate_mse
