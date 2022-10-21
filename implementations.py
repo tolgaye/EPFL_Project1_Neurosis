@@ -2,8 +2,7 @@ import numpy as np
 from typing import Tuple
 
 from random import randrange
-from cost import compute_loss
-from cost import calculate_mse
+from cost import compute_loss, calculate_mse
 from gradient_decent import compute_gradient
 from stochastic_gradient_descent import compute_stoch_gradient
 from helpers import batch_iter
@@ -12,7 +11,7 @@ from helpers import batch_iter
 """
 def reg_logistic_regression(y: np.ndarray, tx: np.ndarray, lambda_: float,
                             initial_w: np.ndarray, max_iters: int, gamma: float) -> Tuple[np.ndarray, float]:
-    
+
     Does the regularized logistic linear.
 
     Parameters
@@ -42,7 +41,7 @@ def reg_logistic_regression(y: np.ndarray, tx: np.ndarray, lambda_: float,
 
     loss: float
         The loss given w as parameters.
-    
+
 
     # init parameters
     threshold = 1e-8
@@ -52,7 +51,7 @@ def reg_logistic_regression(y: np.ndarray, tx: np.ndarray, lambda_: float,
     # start the logistic linear
     for iteration in range(max_iters):
         # get loss and update w.
-        loss, gradient, w = gradient_descent_step(y, tx, w, gamma, lambda_, mode='logistic')
+        loss, gradient, w = gradient_descent(y, tx, w, gamma, lambda_, mode='logistic')
         # log info
         if iteration % 100 == 0:
             print("Current iteration={i}, loss={loss}".format(
@@ -72,7 +71,7 @@ def reg_logistic_regression(y: np.ndarray, tx: np.ndarray, lambda_: float,
 
 def logistic_regression(y: np.ndarray, tx: np.ndarray, initial_w: np.ndarray,
                         max_iters: int, gamma: float) -> Tuple[np.ndarray, float]:
-    
+
     Computes the parameters for the logistic linear.
 
     Parameters
@@ -121,7 +120,7 @@ def least_squares(y: np.ndarray, tx: np.ndarray) -> Tuple[float, np.ndarray]:
     """
     x = tx.T.dot(tx)
     y_ = tx.T.dot(y)
-    w = np.linalg.solve(x, y)
+    w = np.linalg.solve(x, y_)
     loss = compute_loss(y, tx, w)
 
     return loss, w
