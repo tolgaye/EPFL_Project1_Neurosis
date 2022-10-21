@@ -59,7 +59,7 @@ def regs_logistic_regression(y: np.ndarray, tx: np.ndarray, lambda_: float,
             break
 
     # visualization
-    print("loss={l}".format(l=compute_loss(y, tx, w)))
+    #print("loss={l}".format(l=compute_loss(y, tx, w)))
 
     return w, losses[-1]
 
