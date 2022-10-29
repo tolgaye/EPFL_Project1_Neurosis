@@ -1,8 +1,7 @@
 import csv
 import numpy as np
 from typing import Tuple, List
-from src.loss import *
-from src.gradient import *
+
 
 def load_data(data_path, sub_sample=False):
     """Loads data and returns y (class labels), tX (features) and ids (event ids)"""
