@@ -14,64 +14,119 @@ def sigmoid(t):
     """
     return 1. / (1. + np.exp(-t))
 
-
-def logistic_2(y, tx, w, lambda_):
+def compute_gradient(y: np.ndarray, tx: np.ndarray, w: np.ndarray) -> np.ndarray:
     """
-    Compute logistic loss with thresholds to avoid computational overflow
-    :param y: labels
-    :param tx: features
-    :param w: weights
-    :param lambda_: Regularizer factor
+    Computes the gradient of the MSE
+    Parameters
+    ----------
+    y: ndarray
+        Array that contains the correct values to be predicted.
+    tx: ndarray
+        Matrix that contains the data points. The first column is made of 1s.
+    w: ndarray
+        Array containing the parameters of the linear model, from w0 on.
+    Returns
+    -------
+    gradient: ndarray
+        Array containing the gradient of the MSE function.
     """
-    in_pred = tx.dot(w)
-    in_pred[in_pred >= 10] = 10
-    in_pred[in_pred <= -10] = -10
-    pred = sigmoid(in_pred)
-    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
-    return np.squeeze(- loss) + lambda_ * np.squeeze(w.T.dot(w))
 
+    # Get the number of data points
+    n = y.shape[0] if y.shape else 1
 
-def compute_logistic_loss(y, tx, w, loss_function='mse', lambda_=0):
-    """Calculate the loss given a specific function and an optional regularizer factor.
-    :param y: labels
-    :param tx: features
-    :param w: weights
-    :param loss_function: Loss function, possibilities specified below
-    :param lambda_: Regularizer factor
-    The possible loss functions are:
-        * MSE (By default)
-        * MAE
-        * RMSE (Root MSE)
-        * Logistic
-    """
-    return {
-        'mse': 1 / (2 * len(y)) * sum((y - tx.dot(w)) ** 2) + lambda_ * np.linalg.norm(w) ** 2,
-        'rmse': 1 / (len(y)) * np.abs(sum((y - tx.dot(w)))) + lambda_ * np.linalg.norm(w) ** 2,
-        'mae': 1 / len(y) * sum(np.abs(y - tx.dot(w))) + lambda_ * np.linalg.norm(w) ** 2,
-        'logistic': logistic_2(y, tx, w, lambda_)
-    }[loss_function]
-
-
-def compute_logistic_gradient(y, tx, w, loss_function='mse', lambda_=0):
-    """Compute a stochastic gradient from just few examples n and
-    their corresponding y_n labels.
-    :param y: labels
-    :param tx: features
-    :param w: weights
-    :param loss_function: Loss function, possibilities specified below
-    :param lambda_: Regularizer factor
-    The possible loss functions are:
-        * MSE (By default)
-        * MAE
-        * RMSE (Root MSE)
-        * Logistic
-    """
-    return {
-        'mse': -1 / len(y) * tx.transpose().dot(y - tx.dot(w)) + 2 * lambda_ * w,
-        'rmse': -1 / np.sqrt(len(y)) * tx.transpose().dot([-1 if e <= 0 else 1 for e in (y - tx.dot(w))])
-                + 2 * lambda_ * w,
-        'mae': -1 / len(y) * tx.transpose().dot([-1 if e <= 0 else 1 for e in (y - tx.dot(w))]) + 2 * lambda_ * w,
-        'logistic': tx.T.dot(sigmoid(tx.dot(w)) - y) + 2 * lambda_ * w
-    }[loss_function]
+    # Create the error vector (i.e. yn - the predicted n-th value)
+    e = y - tx.dot(w)
     
+
+    return - 1 / n * tx.T.dot(e)
+
+def compute_loss(y: np.ndarray, tx: np.ndarray, w: np.ndarray, lambda_ = 0, cf: str = "mse") -> float:
+    """
+    Calculate the loss using either MSE, RMSE or MAE for  linear.
+    y: ndarray
+        Array that contains the correct values to be predicted.
+    tx: ndarray
+        Matrix that contains the data points. The first column is made of 1s.
+    w: ndarray
+        Array containing the linear parameters to test.
+    
+    lambda_: float
+        The regularization lambda.
+    cf: str
+        String indicating which cost function to use; "mse" (default), "rmse" or "mae".
+    Returns
+    -------
+    loss: float
+        The loss for the given linear parameters.
+    """
+
+    # Check whether the mode parameter is valid
+    valid = ["mse", "rmse", "mae"]
+    assert cf in valid, "Argument 'cf' must be either " + \
+        ", ".join(f"'{x}'" for x in valid)
+
+    # Create the error vector (i.e. yn - the predicted n-th value)
+    e = y - tx.dot(w)
+    
+    # Compute the regularizer if it exists
+    lambda_p = lambda_ * 2 * tx.shape[0] if lambda_ else 0
+
+    if "mse" in cf:
+        mse = e.T.dot(e) / (2 * len(e))
+        if cf == "rmse":
+            return math.sqrt(2 * mse) + lambda_
+        return mse
+    # mae
+    return np.mean(np.abs(e)) + lambda_
+
+def compute_logistic_gradient(y: np.ndarray, tx: np.ndarray, w: np.ndarray, lambda_: float = 0) -> np.ndarray:
+    """"
+    Calculates the of logistic linear loss.
+    Parameters
+    ----------
+    y: ndarray
+        Array that contains the correct values to be predicted.
+    tx: ndarray
+        Matrix that contains the data points. The first column is made of 1s.
+    w: ndarray
+        Array containing the linear parameters to test.
+    lambda_: float
+        The lambda used for regularization. Default behavior is without regularization.
+    Returns
+    -------
+    gradient: np.ndarray
+        The gradient for the given logistic linear parameters.
+    """
+
+    # Find the regularizer component (if lambda != 0)
+    regularizer = lambda_ * w if lambda_ else 0
+
+    return tx.T.dot(sigmoid(tx.dot(w)) - y) + regularizer
+
+def compute_logistic_loss(y: np.ndarray, tx: np.ndarray, w: np.ndarray, lambda_: float = 0) -> float:
+    """"
+    Calculates the loss for logistic linear.
+    Parameters
+    ----------
+    y: ndarray
+        Array that contains the correct values to be predicted.
+    tx: ndarray
+        Matrix that contains the data points. The first column is made of 1s.
+    w: ndarray
+        Array containing the linear parameters to test.
+    lambda_: float
+        The lambda used for regularization. Default behavior is without regularization.
+    Returns
+    -------
+    loss: float
+        The loss for the given logistic linear parameters.
+    """
+
+    # Find the regularizer (if lambda != 0)
+    regularizer = lambda_ / 2 * (np.linalg.norm(tx) ** 2) if lambda_ else 0
+
+    summing = np.sum(np.log(1 + np.exp(tx.dot(w))))
+    y_component = y.T.dot(tx.dot(w)).flatten().flatten()
+
+    return summing - y_component + regularizer
     
