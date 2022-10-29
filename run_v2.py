@@ -24,18 +24,28 @@ def main():
     print(tx.shape)
     
     #Hyperparameters for Implementation
-    max_iter = 50    
-    gamma = 0.08
+    lambda_ = 1e-5
 
 
     # Initialization
-    w_initial = np.ones((31,))
     
-    print("Starting training with Mean Square SGD...\n")
+    print("Starting training with Ridge Regression...\n")
     
-    LR_SGD_losses, LR_SGD_ws =  mean_squared_error_sgd(y_train,tx,w_initial,max_iter,gamma)
+    LR_SGD_losses, LR_SGD_ws = ridge_regression(y_train,tx,lambda_)
     
     print("Training has succesfully ended..")
     
     
-    
+    print("\n\nGenerating .csv file...")
+
+    # Open the test dataset
+    y_sub, x_sub_raw, ids_sub = load_csv_data('data/test.csv')
+     # Create the submission file
+        
+    create_csv_submission(ids_sub, y_sub, 'final-test.csv')
+
+    print("\nfinal-test.csv file generated")
+
+
+if __name__ == "__main__":
+    main()
