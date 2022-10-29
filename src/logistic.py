@@ -130,3 +130,40 @@ def compute_logistic_loss(y: np.ndarray, tx: np.ndarray, w: np.ndarray, lambda_:
 
     return summing - y_component + regularizer
     
+def gradient_descent_step(y: np.ndarray, tx: np.ndarray, w: np.ndarray, gamma: float,
+                          lambda_: float = 0, mode='linear') -> Tuple[float, np.ndarray, np.ndarray]:
+    """
+    Computes one step of gradient descent.
+    Parameters
+    ----------
+    y: ndarray
+        Array that contains the correct values to be predicted.
+    tx: ndarray
+        Matrix that contains the data points. The first column is made of 1s.
+    w: ndarray
+        Array containing the linear parameters to test.
+    gamma: float
+        The stepsize.
+    lambda_: float
+        The lambda used for regularization. Default behavior is without regularization.
+    
+    mode: str
+        The kind of gradient descent. Must be either `linear` or `logistic`
+    Returns
+    -------
+    w: np.ndarray
+        The linear parameters.
+    loss: float
+        The loss given w as parameters.
+    """
+    # Get loss, gradient, hessian
+    loss = (compute_loss(y, tx, w, lambda_=lambda_) if mode == 'linear'
+            else compute_logistic_loss(y, tx, w, lambda_=lambda_))
+    
+    gradient = (compute_gradient(y, tx, w) if mode == 'linear'
+               else compute_logistic_gradient(y, tx, w, lambda_=lambda_))
+
+    # Update w
+    w = w - gamma * gradient
+
+    return loss, gradient, w
