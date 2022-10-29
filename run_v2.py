@@ -31,8 +31,9 @@ def main():
     
     print("Starting training with Ridge Regression...\n")
     
-    LR_SGD_losses, LR_SGD_ws = ridge_regression(y_train,tx,lambda_)
+    RR_losses, RR_ws = ridge_regression(y_train,tx,lambda_)
     
+    print(RR_losses)
     print("Training has succesfully ended..")
     
     
