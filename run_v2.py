@@ -19,6 +19,9 @@ def main():
     # Normalised version of the data (without the 1's column)
     x_normal = normalize(x_clean)
     
+    num_samples = tx_train.shape[0]
+    num_features = tx_train.shape[1]
+    
     first_col = np.ones((num_samples, 1))
     tx = np.concatenate((first_col, x_normal), axis=1)
     print(tx.shape)
