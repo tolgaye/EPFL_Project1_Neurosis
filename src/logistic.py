@@ -2,8 +2,8 @@ import numpy as np
 import math
 from typing import  Tuple
 from random import randrange
-from src.loss import *
-from src.gradient import *
+from loss import *
+from gradient import *
 
 
 def sigmoid(t):
