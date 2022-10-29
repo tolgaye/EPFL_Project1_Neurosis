@@ -53,7 +53,36 @@ def predict_labels(weights: np.ndarray, data: np.ndarray, mode: str = "logistic"
     y_pred[np.where(y_pred > bound)] = 1
 
     return y_pred
-  
+
+def clean_mass_feature(x: np.ndarray) -> np.ndarray:
+    """
+    Deals with the fact that some mass entries are null. It first creates a new column
+    where each element is 0 if the corresponding row has a non-null (!=-999) value,
+    otherwise it is 1. Then it substitutes the null values in the original mass column
+    and adds the newly created column to the original dataset.
+    Arguments
+    ---------
+    x: np.ndarray
+        The dataset whose masses features need to be fixed.
+    Returns
+    -------
+    x: np.ndarray
+        The array with fixed mass values and with the new column.
+    """
+    # Create a new array containing all 0
+    x_mass = np.zeros(x.shape[0])
+
+    # Set the elements corresponding to rows with missing mass to 1
+    x_mass[x[:, 0] == -999] = 1
+
+    # Set the missing values to the median
+    x[:, 0][x[:, 0] == -999] = np.median(x[:, 0][x[:, 0] != -999])
+
+    # Add the newly created column to the dataset
+    x = np.column_stack((x, x_mass))
+
+    return x
+
 def prepare_x(x: np.ndarray, indexes: List[np.ndarray], i: int):
     """
     Prepares the i-th subset of x to be used for training. In particular, it:
