@@ -94,3 +94,25 @@ def prepare_x(x: np.ndarray, indexes: List[np.ndarray], i: int):
     tx = np.c_[np.ones((tx.shape[0], 1)), tx]
 
     return tx
+
+def create_csv_submission(ids: np.ndarray, y_pred: np.ndarray, name: str) -> None:
+    """
+    Creates an output file in csv format for submission to Kaggle.
+    Arguments
+    ---------
+    ids: np.ndarray
+        Event ids associated with each prediction.
+    y_pred: np.ndarray
+        Predicted class labels.
+    name: np.ndarray
+        String name of .csv output file to be created.
+    """
+
+    y_pred[np.where(y_pred == 0)] = -1
+
+    with open(name, 'w') as csv_file:
+        fieldnames = ['Id', 'Prediction']
+        writer = csv.DictWriter(csv_file, delimiter=",", fieldnames=fieldnames)
+        writer.writeheader()
+        for r1, r2 in zip(ids, y_pred):
+            writer.writerow({'Id': int(r1), 'Prediction': int(r2)})
