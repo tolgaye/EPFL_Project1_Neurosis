@@ -9,6 +9,7 @@ import datetime
 from src import *
 from fold import *
 from preprocess import *
+from poly import *
 
 def ridge_regression_sets(x, y, lambda_, k):
     # Create lists to save the different ws, accuracies and losses for the
