@@ -1,10 +1,8 @@
 import numpy as np
-import time
 
-from src.helpers import load_csv_data, create_csv_submission
 from implementations import ridge_regression
-
-from clean_data import predict_labels, get_jet_indexes, clean_mass_feature, prepare_x
+from src.logistic import *
+from src.helpers import *
 
 def main():
     # Import data
@@ -20,7 +18,13 @@ def main():
     print("Starting training with Ridge Regression...\n")
 
     # Run Ridge Regression
-    loss, w = ridge_regression(y, x, lambda_)
+    ws, tr_loss, te_loss, tr_acc, te_acc = ridge_regression(
+        x, y, lambda_)
+
+    print("Train accuracy={tr_acc:.3f}, test accuracy={te_acc:.3f}".format(
+        tr_acc=tr_acc, te_acc=te_acc))
+    print("Train MSE={tr_loss:.3f}, test MSE={te_loss:.3f}".format(
+        tr_loss=tr_loss, te_loss=te_loss))
 
     print("\n\nGenerating .csv file...")
 
@@ -35,13 +39,13 @@ def main():
 
     # Iterate over the parameters of the models trained on the different
     # subsets, and predict the labels of each subset
-    for i, w in enumerate(w):
+    for i, w in enumerate(ws):
         # Prepare the feature of the i-th subset
         tx_sub = prepare_x(x_sub, x_sub_jet_indexes, i)
 
         # Predict the labels
         y_sub[x_sub_jet_indexes[i]] = predict_labels(
-            w[i], tx_sub, mode='linear')
+            ws[i], tx_sub, mode='linear')
 
     # Create the submission file
     create_csv_submission(ids_sub, y_sub, 'final-test.csv')
